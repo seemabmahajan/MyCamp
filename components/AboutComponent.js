@@ -4,16 +4,19 @@ import { Card } from "react-native-elements";
 import  Mission from './MissionComponent';
 import { FlatList } from 'react-native';
 import { ListItem } from 'react-native-elements';
-import { PARTNERS } from '../shared/partners';
+//import { PARTNERS } from '../shared/partners';
+import { connect } from 'react-redux';
+import { baseUrl } from '../shared/baseUrl';
+import Loading from './LoadingComponent';
+
+const mapStateToProps = state => {
+    return {
+        partners: state.partners
+    }
+}  
 
 class About extends Component {
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            partners:PARTNERS
-        };
-    }
   static navigationOptions = {
     title: "About"
   };
@@ -25,10 +28,33 @@ class About extends Component {
             <ListItem
                 title={item.name}
                 subtitle={item.description}
-                leftAvatar={{ source: require('./images/bootstrap-logo.png')}}
+                leftAvatar={{ source: {uri: baseUrl + item.image}}}
             />
         );
     };
+
+    if (this.props.partners.isLoading) {
+        return (
+            <ScrollView>
+                <Mission />
+                <Card
+                    title='Community Partners'>
+                    <Loading />
+                </Card>
+            </ScrollView>
+        );
+    }
+    if (this.props.partners.errMess) {
+        return (
+            <ScrollView>
+                <Mission />
+                <Card
+                    title='Community Partners'>
+                    <Text>{this.props.partners.errMess}</Text>
+                </Card>
+            </ScrollView>
+        );
+    }
 
 
     return (
@@ -39,7 +65,7 @@ class About extends Component {
                 wrapperStyle={{margin: 10}}
             >
                 <FlatList  style={{ marginTop : 0, borderColor:'grey '}}
-                    data={this.state.partners}
+                    data={this.props.partners.partners}
                     renderItem={renderPartner}
                     keyExtractor={item => item.id.toString()}
                 />
@@ -49,4 +75,4 @@ class About extends Component {
   }
 }
 
-export default About;
+export default connect(mapStateToProps)(About);
